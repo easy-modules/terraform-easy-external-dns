@@ -6,8 +6,8 @@ data "aws_eks_cluster" "eks" {
 
 locals {
   eks_oidc_issuer = trimprefix(data.aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://")
-  account_id = data.aws_caller_identity.current.account_id
-  partition  = data.aws_partition.current.partition
+  account_id      = data.aws_caller_identity.current.account_id
+  partition       = data.aws_partition.current.partition
   tags = {
     Terraform = "true"
     ManagedBy = "Terraform"
@@ -73,7 +73,7 @@ resource "kubernetes_service_account_v1" "external_dns" {
   metadata {
     name      = var.service_account_name
     namespace = var.namespace
-    labels    = {
+    labels = {
       "app.kubernetes.io/name" = var.service_account_name
     }
     annotations = {
@@ -83,7 +83,7 @@ resource "kubernetes_service_account_v1" "external_dns" {
 }
 resource "kubernetes_cluster_role_v1" "external_dns" {
   metadata {
-    name   = "external-dns"
+    name = "external-dns"
   }
 
   rule {
@@ -118,7 +118,7 @@ resource "kubernetes_cluster_role_v1" "external_dns" {
 }
 resource "kubernetes_cluster_role_binding_v1" "external_dns" {
   metadata {
-    name   = "external-dns-viewer"
+    name = "external-dns-viewer"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -141,7 +141,7 @@ resource "kubernetes_deployment_v1" "route53_external_dns" {
   metadata {
     name      = var.external_dns_name
     namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
-    labels    = {
+    labels = {
       "app.kubernetes.io/name" = var.external_dns_name
     }
   }
@@ -164,8 +164,8 @@ resource "kubernetes_deployment_v1" "route53_external_dns" {
       spec {
         service_account_name = kubernetes_service_account_v1.external_dns.metadata.0.name
         container {
-          name = "external-dns"
-          image = "registry.k8s.io/external-dns/external-dns:v0.13.1"
+          name              = "external-dns"
+          image             = "registry.k8s.io/external-dns/external-dns:v0.13.1"
           image_pull_policy = "IfNotPresent"
           args = [
             "--policy=sync",
@@ -199,7 +199,7 @@ resource "kubernetes_service_v1" "route53_external_dns" {
   metadata {
     name      = var.external_dns_name
     namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
-    labels    = {
+    labels = {
       "app.kubernetes.io/name" = var.external_dns_name
     }
   }
@@ -222,13 +222,13 @@ resource "kubernetes_service_v1" "route53_external_dns" {
 # KUBERNETES DEPLOY CLOUDFLARE EXTERNAL DNS
 #==============================================================================
 resource "kubernetes_deployment_v1" "cloudflare_external_dns" {
-  count = var.cloudflare_enabled == true ? 1 : 0
-  depends_on = [ kubernetes_cluster_role_binding_v1.external_dns ]
+  count      = var.cloudflare_enabled == true ? 1 : 0
+  depends_on = [kubernetes_cluster_role_binding_v1.external_dns]
 
   metadata {
     name      = "${var.external_dns_name}-cloudflare"
     namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
-    labels    = {
+    labels = {
       "app.kubernetes.io/name" = "${var.external_dns_name}-cloudflare"
     }
   }
@@ -255,8 +255,8 @@ resource "kubernetes_deployment_v1" "cloudflare_external_dns" {
         service_account_name = kubernetes_service_account_v1.external_dns.metadata.0.name
 
         container {
-          name = "external-dns"
-          image = "registry.k8s.io/external-dns/external-dns:v0.13.1"
+          name              = "external-dns"
+          image             = "registry.k8s.io/external-dns/external-dns:v0.13.1"
           image_pull_policy = "IfNotPresent"
           args = [
             "--policy=sync",
@@ -295,12 +295,12 @@ resource "kubernetes_deployment_v1" "cloudflare_external_dns" {
   }
 }
 resource "kubernetes_service_v1" "cloudflare_external_dns" {
-  count = var.cloudflare_enabled == true ? 1 : 0
-  depends_on = [ kubernetes_deployment_v1.cloudflare_external_dns ]
+  count      = var.cloudflare_enabled == true ? 1 : 0
+  depends_on = [kubernetes_deployment_v1.cloudflare_external_dns]
   metadata {
     name      = var.external_dns_name
     namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
-    labels    = {
+    labels = {
       "app.kubernetes.io/name" = var.external_dns_name
     }
   }
