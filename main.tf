@@ -123,12 +123,12 @@ resource "kubernetes_cluster_role_binding_v1" "external_dns" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role_v1.external_dns.metadata.0.name
+    name      = kubernetes_cluster_role_v1.external_dns.metadata[0].name
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account_v1.external_dns.metadata.0.name
-    namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
+    name      = kubernetes_service_account_v1.external_dns.metadata[0].name
+    namespace = kubernetes_namespace_v1.external_dns.metadata[0].name
   }
 }
 #==============================================================================
@@ -140,7 +140,7 @@ resource "kubernetes_deployment_v1" "route53_external_dns" {
   ]
   metadata {
     name      = var.external_dns_name
-    namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
+    namespace = kubernetes_namespace_v1.external_dns.metadata[0].name
     labels = {
       "app.kubernetes.io/name" = var.external_dns_name
     }
@@ -162,7 +162,7 @@ resource "kubernetes_deployment_v1" "route53_external_dns" {
         }
       }
       spec {
-        service_account_name = kubernetes_service_account_v1.external_dns.metadata.0.name
+        service_account_name = kubernetes_service_account_v1.external_dns.metadata[0].name
         container {
           name              = "external-dns"
           image             = "registry.k8s.io/external-dns/external-dns:v0.13.1"
@@ -198,7 +198,7 @@ resource "kubernetes_service_v1" "route53_external_dns" {
 
   metadata {
     name      = var.external_dns_name
-    namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
+    namespace = kubernetes_namespace_v1.external_dns.metadata[0].name
     labels = {
       "app.kubernetes.io/name" = var.external_dns_name
     }
@@ -227,7 +227,7 @@ resource "kubernetes_deployment_v1" "cloudflare_external_dns" {
 
   metadata {
     name      = "${var.external_dns_name}-cloudflare"
-    namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
+    namespace = kubernetes_namespace_v1.external_dns.metadata[0].name
     labels = {
       "app.kubernetes.io/name" = "${var.external_dns_name}-cloudflare"
     }
@@ -252,7 +252,7 @@ resource "kubernetes_deployment_v1" "cloudflare_external_dns" {
         }
       }
       spec {
-        service_account_name = kubernetes_service_account_v1.external_dns.metadata.0.name
+        service_account_name = kubernetes_service_account_v1.external_dns.metadata[0].name
 
         container {
           name              = "external-dns"
@@ -299,7 +299,7 @@ resource "kubernetes_service_v1" "cloudflare_external_dns" {
   depends_on = [kubernetes_deployment_v1.cloudflare_external_dns]
   metadata {
     name      = var.external_dns_name
-    namespace = kubernetes_namespace_v1.external_dns.metadata.0.name
+    namespace = kubernetes_namespace_v1.external_dns.metadata[0].name
     labels = {
       "app.kubernetes.io/name" = var.external_dns_name
     }
